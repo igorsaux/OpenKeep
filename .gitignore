@@ -194,8 +194,6 @@ Temporary Items
 *.sublime-workspace
 
 #Visual studio stuff
-*.vscode/*
-!/.vscode/extensions.json
 tools/MapAtmosFixer/MapAtmosFixer/obj/*
 tools/MapAtmosFixer/MapAtmosFixer/bin/*
 **/.vs/
