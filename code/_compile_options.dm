@@ -19,11 +19,6 @@
 #define MODE_RESTART
 //comment out if you want to restart the server instead of shutting down
 
-// Comment this out if you are debugging problems that might be obscured by custom error handling in world/Error
-#ifdef DEBUG
-#define USE_CUSTOM_ERROR_HANDLER
-#endif
-
 #ifdef TESTING
 #define DATUMVAR_DEBUGGING_MODE
 

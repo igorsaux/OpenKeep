@@ -1,7 +1,6 @@
 GLOBAL_VAR_INIT(total_runtimes, GLOB.total_runtimes || 0)
 GLOBAL_VAR_INIT(total_runtimes_skipped, 0)
 
-#ifdef USE_CUSTOM_ERROR_HANDLER
 #define ERROR_USEFUL_LEN 2
 
 /world/Error(exception/E, datum/e_src)
@@ -22,7 +21,6 @@ GLOBAL_VAR_INIT(total_runtimes_skipped, 0)
 	else if(copytext(E.name,1,18) == "Out of resources!")
 		log_world("BYOND out of memory. Restarting")
 		log_game("BYOND out of memory. Restarting")
-		TgsEndProcess()
 		Reboot(reason = 1)
 		return ..()
 	
@@ -125,13 +123,5 @@ GLOBAL_VAR_INIT(total_runtimes_skipped, 0)
 	for(var/line in desclines)
 		SEND_TEXT(world.log, line)
 
-#ifdef UNIT_TESTS
-	if(GLOB.current_test)
-		//good day, sir
-		GLOB.current_test.Fail("[main_line]\n[desclines.Join("\n")]")
-#endif
-
-
 	// This writes the regular format (unwrapping newlines and inserting timestamps as needed).
 	log_runtime("runtime error: [E.name]\n[E.desc]")
-#endif

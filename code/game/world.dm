@@ -47,10 +47,6 @@ GLOBAL_VAR(restart_counter)
 
 	make_datum_references_lists()	//initialises global lists for referencing frequently used datums (so that we only ever do it once)
 
-	TgsNew(minimum_required_security_level = TGS_SECURITY_TRUSTED)
-
-	GLOB.revdata = new
-
 	config.Load(params[OVERRIDE_CONFIG_DIRECTORY_PARAMETER])
 
 	load_admins()
@@ -66,15 +62,8 @@ GLOBAL_VAR(restart_counter)
 	else // We got a db connected, GLOB.round_id ticks up based on where its at on the db.
 		GLOB.rogue_round_id = "[pick(GLOB.roundid)][GLOB.round_id]-[timestamp]"
 	SetupLogs()
-	if(CONFIG_GET(string/channel_announce_new_game_message))
-		send2chat(new /datum/tgs_message_content(CONFIG_GET(string/channel_announce_new_game_message)), CONFIG_GET(string/chat_announce_new_game))
 
-#ifndef USE_CUSTOM_ERROR_HANDLER
 	world.log = file("[GLOB.log_directory]/dd.log")
-#else
-	if (TgsAvailable())
-		world.log = file("[GLOB.log_directory]/dd.log") //not all runtimes trigger world/Error, so this is the only way to ensure we can see all of them.
-#endif
 
 	LoadVerbs(/datum/verbs/menu)
 	load_whitelist()
@@ -102,7 +91,7 @@ GLOBAL_VAR(restart_counter)
 	if(NO_INIT_PARAMETER in params)
 		return
 
-	Master.Initialize(10, FALSE, TRUE)
+	Master.Initialize(10, FALSE)
 
 	if(TEST_RUN_PARAMETER in params)
 		HandleTestRun()
@@ -202,14 +191,7 @@ GLOBAL_VAR(restart_counter)
 	if(GLOB.round_id)
 		log_game("Round ID: [GLOB.round_id]")
 
-	// This was printed early in startup to the world log and config_error.log,
-	// but those are both private, so let's put the commit info in the runtime
-	// log which is ultimately public.
-	log_runtime(GLOB.revdata.get_log_message())
-
 /world/Topic(T, addr, master, key)
-	TGS_TOPIC //redirect to server tools if necessary
-
 	var/static/list/topic_handlers = TopicHandlers()
 
 	var/list/input = params2list(T)
@@ -286,36 +268,9 @@ GLOBAL_VAR(restart_counter)
 	to_chat(world, "Please be patient as the server restarts. You will be automatically reconnected in about 60 seconds.")
 	Master.Shutdown()	//run SS shutdowns? rtchange
 
-	TgsReboot()
-
 	if(TEST_RUN_PARAMETER in params)
 		FinishTestRun()
 		return
-
-	if(TgsAvailable())
-		send2chat(new /datum/tgs_message_content("Round ending!"), CONFIG_GET(string/chat_announce_new_game))
-		testing("tgsavailable passed")
-		var/do_hard_reboot
-		// check the hard reboot counter
-		var/ruhr = CONFIG_GET(number/rounds_until_hard_restart)
-		switch(ruhr)
-			if(-1)
-				do_hard_reboot = FALSE
-			if(0)
-				do_hard_reboot = TRUE
-			else
-				if(GLOB.restart_counter >= ruhr)
-					do_hard_reboot = TRUE
-				else
-					text2file("[++GLOB.restart_counter]", RESTART_COUNTER_PATH)
-					do_hard_reboot = FALSE
-
-		if(do_hard_reboot)
-			log_world("World hard rebooted at [time_stamp()]")
-			shutdown_logging() // See comment below.
-			TgsEndProcess()
-	else
-		testing("tgsavailable [TgsAvailable()]")
 
 	log_world("World rebooted at [time_stamp()]")
 	shutdown_logging() // Past this point, no logging procs can be used, at risk of data loss.

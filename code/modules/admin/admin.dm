@@ -544,8 +544,6 @@
 		return
 
 	var/list/options = list("Regular Restart", "Hard Restart (No Delay/Feeback Reason)", "Hardest Restart (No actions, just reboot)")
-	if(world.TgsAvailable())
-		options += "Server Restart (Kill and restart DD)";
 
 	var/rebootconfirm
 	if(SSticker.admin_delay_notice)
@@ -567,9 +565,6 @@
 				if("Hardest Restart (No actions, just reboot)")
 					to_chat(world, "Hard world reboot - [init_by]")
 					world.Reboot(fast_track = TRUE)
-				if("Server Restart (Kill and restart DD)")
-					to_chat(world, "Server restart - [init_by]")
-					world.TgsEndProcess()
 
 /datum/admins/proc/end_round()
 	set category = "Server"
